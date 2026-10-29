@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="bn"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>মক টেস্ট কেন্দ্র</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14213d;--bg:#eef1f6;--c:#fff;--t:#1b2333;--a:#0b6e4f;--r:#c0392b;--l:#c9d1e0}
+@media(prefers-color-scheme:dark){:root{--ink:#9db4ff;--bg:#0e1420;--c:#182133;--t:#e6eaf3;--a:#3ddc97;--r:#ff7b6b;--l:#33415c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font:17px/1.6 "Hind Siliguri",system-ui,sans-serif}
+main{max-width:700px;margin:0 auto;padding:14px}
+.card{background:var(--c);border:1px solid var(--l);border-radius:6px;padding:16px;margin:12px 0}
+h2{margin:0 0 8px;color:var(--ink)}
+input{font:inherit;width:100%;padding:10px;margin:5px 0;border:1px solid var(--l);border-radius:6px;background:var(--bg);color:var(--t)}
+button{font:inherit;font-weight:600;padding:10px 18px;border:0;border-radius:6px;background:var(--ink);color:var(--c);cursor:pointer;margin:4px 4px 4px 0}
+button.s{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--a);outline-offset:2px}
+.o{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:transparent;color:var(--t);border:1px solid var(--l);margin:6px 0;font-weight:400}
+.o i{flex:none;width:30px;height:30px;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:15px}
+.o.sel i{background:var(--ink);color:var(--c)}
+.ok{border-color:var(--a)!important;background:color-mix(in srgb,var(--a) 15%,transparent)!important}
+.no{border-color:var(--r)!important;background:color-mix(in srgb,var(--r) 15%,transparent)!important}
+#tm{position:sticky;top:0;z-index:5;background:var(--ink);color:var(--c);padding:8px 14px;font-weight:700;display:flex;justify-content:space-between}
+table{width:100%;border-collapse:collapse}td,th{padding:8px 6px;border-bottom:1px solid var(--l);text-align:left}
+.me{font-weight:700;background:color-mix(in srgb,var(--a) 15%,transparent)}
+.err{color:var(--r);font-weight:600}.ex{margin:6px 0 0;font-size:15px;opacity:.85}
+.st{margin:6px 0 10px;padding-left:12px;border-left:3px solid var(--l);font-size:16px}
+</style></head><body><main id="app"></main>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile}from"https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+import{getFirestore,doc,getDoc,setDoc,collection,query,where,getDocs}from"https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyBBAEQ-SMWnfu8Ug6v15yKuDFmipRCP-5o",authDomain:"mock--test-bddd4.firebaseapp.com",projectId:"mock--test-bddd4",storageBucket:"mock--test-bddd4.firebasestorage.app",messagingSenderId:"1005421506530",appId:"1:1005421506530:web:b18cbf011f83b3547853bb"};
+
+/* ====== এখানে বদলান ====== */
+const BATCH_CODE="batch2026";
+const EXAM={id:"intl01",title:"আন্তর্জাতিক বিষয়াবলি মক টেস্ট (BCS প্রিলি)",min:11,qs:[
+{d:'easy',t:'মিয়ানমারে কোন সালের নাগরিকত্ব আইনে রোহিঙ্গারা নাগরিকত্ব হারায়?',o:['১৯৬২','১৯৭৮','১৯৮২','১৯৮৬'],a:2,e:'১৯৮২ সালের নাগরিকত্ব আইনে রোহিঙ্গারা নাগরিকের তালিকা থেকে বাদ পড়ে।'},
+{d:'easy',t:'I was amazed ___ her courage.',o:['to','on','with','at'],a:3,e:'"Amazed/astonished at" is the fixed pair.'},
+{d:'easy',t:'NATO প্রতিষ্ঠিত হয় কত সালে?',o:['১৯৪৫','১৯৪৯','১৯৫১','১৯৫৫'],a:1,e:'NATO প্রতিষ্ঠিত হয় ৪ এপ্রিল ১৯৪৯ সালে। ১৯৫১ সালে ANZUS এবং ১৯৫৫ সালে ওয়ারশ চুক্তি হয়, তাই এই দুটি সাল ফাঁদ।'},
+{d:'medium',t:'ইরানের Fordow পরমাণু সমৃদ্ধকরণ কেন্দ্র কোন প্রদেশে অবস্থিত?',o:['ইসফাহান','ইলাম','কোম','তেহরান'],a:2,e:'Fordow অবস্থিত কোম প্রদেশে। ইসফাহান আলাদা একটি পরমাণু স্থাপনার এলাকা, এটি সাধারণ ফাঁদ।'},
+{d:'medium',t:'নিচের কোনটি নিরস্ত্রীকরণ বা অস্ত্র নিয়ন্ত্রণ চুক্তির সাথে সম্পৃক্ত নয়?',o:['NATO','SALT','CTBT','NPT'],a:0,e:'NATO একটি সামরিক জোট, নিরস্ত্রীকরণ চুক্তি নয়। SALT, CTBT ও NPT পরমাণু অস্ত্র নিয়ন্ত্রণ বা নিষিদ্ধকরণের চুক্তি।'},
+{d:'easy',t:'জাতিসংঘ শান্তিরক্ষা বাহিনীর হেলমেটের রং কী?',o:['সাদা','হলুদ','সবুজ','নীল'],a:3,e:'শান্তিরক্ষীরা নীল হেলমেট বা বেরেটের জন্য পরিচিত, তাই তাদের "Blue Helmets" বলা হয়।'},
+{d:'hard',t:'সিরিয়ার আসাদ সরকারের পতন নিয়ে নিচের কোন তথ্যগুলো সঠিক?',s:['৮ ডিসেম্বর ২০২৪ বাশার আল-আসাদের শাসনের অবসান ঘটে।','HTS-এর নেতা আহমেদ আল-শারা (আবু মুহাম্মাদ আল-জুলানি)।','বাশার আল-আসাদ যুক্তরাষ্ট্রে আশ্রয় নেন।','HTS-এর পূর্ণরূপ Hayat Tahrir al-Sham।'],o:['i, ii, iii','i, ii, iv','ii, iii, iv','i, iii, iv'],a:1,e:'আসাদ রাশিয়ায় আশ্রয় নেন, যুক্তরাষ্ট্রে নয়। তাই iii ভুল।'},
+{d:'medium',t:'Which of the following sentences are correct?',s:['Her view is different from mine.','She was prevented to leaving.','He recovered from his illness.','She suffers of headaches.'],o:['i, iii','ii, iv','i, ii, iii','i, iii, iv'],a:0,e:'"Prevent from" (not "to") and "suffer from" (not "of") are the fixed pairs, so ii and iv are wrong.'},
+{d:'easy',t:'"One Big Beautiful Bill Act"-এ যুক্তরাষ্ট্র থেকে remittance পাঠানোর ওপর কত শতাংশ কর আরোপ করা হয়?',o:['৫%','৩%','২%','১%'],a:3,e:'কর ১%। ৫%, ৩% বা ২% দিয়ে ফাঁদ তৈরি করা হয়।'},
+{d:'medium',t:'যুক্তরাষ্ট্র কখন ABM চুক্তি থেকে নিজেকে প্রত্যাহার করে?',o:['জুন ২০০১','জুন ২০০২','জুন ২০০৩','জুন ২০০৮'],a:1,e:'যুক্তরাষ্ট্র ১৩ জুন ২০০২ সালে ABM চুক্তি থেকে বেরিয়ে আসে। ২০০১ নয়, ২০০২ হলো সঠিক সাল।'},
+{d:'vhard',t:'নিচের তথ্যগুলোর মধ্যে কোনগুলো সঠিক?',s:['QUAD = যুক্তরাষ্ট্র + ভারত + জাপান + অস্ট্রেলিয়া।','AUKUS = যুক্তরাষ্ট্র + যুক্তরাজ্য + অস্ট্রেলিয়া।','AUKUS-এর সদস্য দেশ ভারত।','QUAD-এর সদস্য দেশ যুক্তরাজ্য।'],o:['i, ii','ii, iii','i, iii, iv','iii, iv'],a:0,e:'AUKUS-এ ভারত নেই, QUAD-এ ভারত আছে। যুক্তরাজ্য AUKUS-এর সদস্য, QUAD-এর নয়। ভারত বা জাপানকে AUKUS-এ ঢুকিয়ে দেওয়া সাধারণ ফাঁদ।'},
+{d:'hard',t:'Which of the following statements are correct?',s:['"Impediment" means a hindrance or obstacle.','"Impervious" means unaffected by something.','"Impediment" can also mean a speech defect.','"Impervious" means easily influenced.'],o:['i, ii, iii','i, ii, iv','ii, iii, iv','i, iii, iv'],a:0,e:'"Impervious" means not allowing fluid through, or not affected by something. It is the opposite of easily influenced, so iv is wrong.'},
+{d:'easy',t:'WHO কবে COVID-19-কে Pandemic ঘোষণা করে?',o:['১১ মার্চ ২০২০','১ মার্চ ২০২০','৩১ ডিসেম্বর ২০১৯','১ এপ্রিল ২০২০'],a:0,e:'WHO ১১ মার্চ ২০২০ Pandemic ঘোষণা করে। ৩১ ডিসেম্বর ২০১৯ হলো উহানে প্রথম রিপোর্টের তারিখ, তাই সেটি ফাঁদ।'},
+{d:'medium',t:'যুক্তরাষ্ট্রের "Operation Midnight Hammer" ইরানের পরমাণু স্থাপনায় কবে হামলা চালায়?',o:['২২ জুন ২০২৫','২০ জুন ২০২৫','২১ জুন ২০২৫','২৩ জুন ২০২৫'],a:0,e:'হামলা হয় ২২ জুন ২০২৫। B-2 বোমারু বিমান থেকে GBU-57 বাঙ্কার-বাস্টার বোমা ফেলা হয় Fordow, Natanz ও Isfahan-এ। ২০, ২১ বা ২৩ জুন ফাঁদ।'},
+{d:'easy',t:'যে চুক্তির ফলে আন্তর্জাতিক ফৌজদারি আদালত (ICC) প্রতিষ্ঠিত হয়, সেটি কোনটি?',o:['জেনেভা কনভেনশন','ভিয়েনা কনভেনশন','হেগ কনভেনশন','রোম সংবিধি (Rome Statute)'],a:3,e:'রোম সংবিধি (১৯৯৮) থেকে ICC প্রতিষ্ঠিত হয় এবং এটি ২০০২ সালে কার্যকর হয়। ভিয়েনা কনভেনশন কূটনৈতিক সম্পর্কের জন্য।'},
+{d:'hard',t:'ক্ষমতার ধারণাগুলো (A), (B), (C) ক্রমে মেলাও: (A) সামরিক ও অর্থনৈতিক চাপ প্রয়োগের ক্ষমতা, (B) সংস্কৃতি ও আদর্শের মাধ্যমে আকর্ষণ করে প্রভাব বিস্তার, (C) তথ্য বিকৃতি ও প্রোপাগান্ডার মাধ্যমে প্রভাব। সঠিক ক্রম কোনটি?',s:['Soft Power','Sharp Power','Hard Power'],o:['i, ii, iii','ii, iii, i','iii, ii, i','iii, i, ii'],a:3,e:'Hard Power = চাপ প্রয়োগ (iii)। Soft Power = আকর্ষণ (i)। Sharp Power = প্রোপাগান্ডা (ii)। ক্রম হলো iii, i, ii।'},
+{d:'medium',t:'আফগানিস্তানের তালেবান সরকারকে বৈধ কর্তৃপক্ষ হিসেবে প্রথম পূর্ণ রাষ্ট্রীয় স্বীকৃতি দেয় কোন দেশ?',o:['চীন','পাকিস্তান','রাশিয়া','ইরান'],a:2,e:'রাশিয়া ২০২৫ সালের জুলাইয়ে প্রথম পূর্ণ স্বীকৃতি দেয়। চীন ২০২৩ সালের ডিসেম্বরে তালেবান-নিযুক্ত রাষ্ট্রদূতের পরিচয়পত্র নিয়েছিল, কিন্তু সেটি পূর্ণ রাষ্ট্রীয় স্বীকৃতি ছিল না।'},
+{d:'medium',t:'JCPoA (ইরান পরমাণু চুক্তি) কবে স্বাক্ষরিত হয়?',o:['৮ মে ২০১৮','২৪ নভেম্বর ২০১৩','১৪ জুলাই ২০১৫','১৪ সেপ্টেম্বর ২০১৮'],a:2,e:'JCPoA স্বাক্ষরিত হয় ১৪ জুলাই ২০১৫। ৮ মে ২০১৮ হলো যুক্তরাষ্ট্রের প্রত্যাহারের তারিখ। এই দুই তারিখ গুলিয়ে ফেলা সাধারণ ভুল।'},
+{d:'vhard',t:'ইরান-ইসরায়েল-যুক্তরাষ্ট্র ঘটনাগুলো ঘটার ক্রম (প্রথম থেকে শেষ) কোনটি?',s:['Operation Midnight Hammer','ইসরায়েল-ইরান ১২ দিনের যুদ্ধের শুরু','যুদ্ধবিরতি কার্যকর (২৪ জুন ২০২৫)'],o:['i, ii, iii','ii, iii, i','ii, i, iii','iii, ii, i'],a:2,e:'প্রথমে ইসরায়েলের হামলায় যুদ্ধ শুরু (ii), এরপর ২২ জুন Midnight Hammer (i), শেষে ২৪ জুন যুদ্ধবিরতি (iii)।'},
+{d:'easy',t:'বৈশ্বিক শান্তি সূচকে (Global Peace Index) শীর্ষ দেশ কোনটি?',o:['নরওয়ে','সুইজারল্যান্ড','ডেনমার্ক','আইসল্যান্ড'],a:3,e:'GPI-তে শীর্ষ দেশ আইসল্যান্ড। নরওয়ে বা ডেনমার্ককে ফাঁদ হিসেবে দেওয়া হয়।'},
+{d:'hard',t:'নোবেল শান্তি পুরস্কারের বিজয়ীদের (A), (B), (C) ক্রমে মেলাও: (A) ২০১৯ সালের বিজয়ী, (B) ২০২০ সালের বিজয়ী, (C) ২০২৪ সালের বিজয়ী। সঠিক ক্রম কোনটি?',s:['WFP (World Food Programme)','Nihon Hidankyo (জাপান)','আবি আহমেদ আলি (ইথিওপিয়া)'],o:['i, ii, iii','ii, iii, i','iii, ii, i','iii, i, ii'],a:3,e:'২০১৯: আবি আহমেদ আলি (iii), ২০২০: WFP (i), ২০২৪: Nihon Hidankyo (ii)। ক্রম হলো iii, i, ii।'},
+{d:'medium',t:'নিচের সমার্থক শব্দজোড়াগুলোর মধ্যে কোনগুলো সঠিক?',s:['সাদা — ধবল','বন — কানন','কালো — শুভ্র','মুক্তা — মৌক্তিক'],o:['i, ii, iii','i, ii, iv','ii, iii, iv','i, iii, iv'],a:1,e:'"শুভ্র" সাদার সমার্থক, কালোর নয়। কালোর সমার্থক কৃষ্ণ, শ্যাম। তাই iii ভুল।'},
+{d:'easy',t:'Soft Power ধারণাটি কে প্রবর্তন করেন?',o:['Joseph Nye','Hans Morgenthau','Kenneth Waltz','Alexander Wendt'],a:0,e:'Soft Power ধারণাটি Joseph Nye-র। Morgenthau ও Waltz বাস্তববাদী, Wendt গঠনবাদী তাত্ত্বিক।'},
+{d:'medium',t:'রোহিঙ্গা গণহত্যা বিষয়ে ICJ তার অন্তর্বর্তীকালীন আদেশে মিয়ানমারকে কয়টি ব্যবস্থা নিতে বলে?',o:['৩টি','৪টি','৫টি','২টি'],a:1,e:'গাম্বিয়ার মামলায় ICJ ২৩ জানুয়ারি ২০২০ মিয়ানমারকে ৪টি অন্তর্বর্তীকালীন ব্যবস্থা নিতে নির্দেশ দেয়।'},
+{d:'vhard',t:'নিচের চুক্তিগুলো সম্পাদনের সাল অনুযায়ী প্রাচীন থেকে নতুন ক্রম কোনটি?',s:['CTBT','INF Treaty','JCPoA'],o:['i, ii, iii','ii, iii, i','iii, ii, i','ii, i, iii'],a:3,e:'INF (১৯৮৭), CTBT (১৯৯৬), JCPoA (২০১৫)। ক্রম হলো ii, i, iii।'},
+{d:'medium',t:'AUKUS ত্রিপক্ষীয় নিরাপত্তা জোট কবে ঘোষিত হয়?',o:['১৫ আগস্ট ২০২১','১৫ সেপ্টেম্বর ২০২১','২০ জানুয়ারি ২০২২','৪ এপ্রিল ২০২১'],a:1,e:'AUKUS ১৫ সেপ্টেম্বর ২০২১ সালে ঘোষিত হয়। এটি যুক্তরাষ্ট্র, যুক্তরাজ্য ও অস্ট্রেলিয়ার জোট।'},
+{d:'hard',t:'নিচের তথ্যগুলোর মধ্যে কোনগুলো সঠিক?',s:['Operation Sindoor ভারত পরিচালনা করে।','Operation Bunyan-um-Marsoos পরিচালনা করে ভারত।','Operation Iron Swords হলো গাজায় ইসরায়েলের সামরিক অভিযান।','Operation Al-Aqsa Flood হলো ইসরায়েলে হামাসের আক্রমণ।'],o:['i, ii, iii','ii, iii, iv','i, iii, iv','i, ii, iv'],a:2,e:'Operation Bunyan-um-Marsoos পাকিস্তানের পাল্টা অভিযান, ভারতের নয়। তাই ii ভুল।'},
+{d:'medium',t:'THAAD কী?',o:['একটি পরমাণু চুক্তি','NATO-র অঙ্গসংগঠন','যুক্তরাষ্ট্রের ক্ষেপণাস্ত্র প্রতিরক্ষা ব্যবস্থা','রাসায়নিক অস্ত্র নিষিদ্ধ করার চুক্তি'],a:2,e:'THAAD = Terminal High Altitude Area Defense, যুক্তরাষ্ট্রের ক্ষেপণাস্ত্র প্রতিরক্ষা ব্যবস্থা।'},
+{d:'easy',t:'WMD-এর পূর্ণরূপ কী?',o:['World Military Defence','Weapons of Mass Destruction','War Material Deployment','World Mass Development'],a:1,e:'WMD = Weapons of Mass Destruction (পারমাণবিক, রাসায়নিক ও জৈব গণবিধ্বংসী অস্ত্র)।'},
+{d:'medium',t:'Abraham Accords কত তারিখে স্বাক্ষরিত হয়?',o:['১৫ আগস্ট ২০২০','১৫ সেপ্টেম্বর ২০২০','১৫ অক্টোবর ২০২০','১৫ নভেম্বর ২০২০'],a:1,e:'১৫ সেপ্টেম্বর ২০২০ সালে UAE ও বাহরাইন একই দিনে ইসরায়েলের সাথে স্বাক্ষর করে।'},
+{d:'vhard',t:'Match the words with these meanings in the order (A), (B), (C): (A) flawless, (B) rude and disrespectful, (C) acting hastily without thinking. Which sequence of words is correct?',s:['Impetuous','Impeccable','Impertinent'],o:['i, ii, iii','iii, i, ii','ii, i, iii','ii, iii, i'],a:3,e:'Impeccable = flawless (ii). Impertinent = rude (iii). Impetuous = hasty (i). The order is ii, iii, i.'},
+{d:'hard',t:'NATO নিয়ে নিচের তথ্যগুলোর মধ্যে কোনগুলো সঠিক?',s:['NATO-র প্রতিষ্ঠাকালীন সদস্য ছিল ১২টি রাষ্ট্র।','ফিনল্যান্ড NATO-র ৩১তম সদস্য।','সুইডেন NATO-র ৩১তম সদস্য।','Article 4 হলো পরামর্শের বিধান।'],o:['i, ii, iv','i, ii, iii','ii, iii, iv','i, iii, iv'],a:0,e:'ফিনল্যান্ড ৩১তম (২০২৩) এবং সুইডেন ৩২তম (২০২৪) সদস্য। তাই iii ভুল।'},
+{d:'hard',t:'কূটনীতির পরিভাষা নিয়ে নিচের কোন তথ্যটি ভুল?',s:['Agrément: রাষ্ট্রদূত নিয়োগের আগে গ্রহীতা দেশের পূর্বানুমোদন','Démarche: কূটনৈতিক আপত্তি জানানোর আনুষ্ঠানিক পদ্ধতি','Track-II Diplomacy: আনুষ্ঠানিক রাষ্ট্রীয় কূটনীতি','High Commissioner: কমনওয়েলথভুক্ত দেশগুলোর মধ্যে ব্যবহৃত পদবি'],o:['কেবল i','কেবল ii','কেবল iii','কেবল iv'],a:2,e:'আনুষ্ঠানিক রাষ্ট্রীয় কূটনীতি হলো Track-I। Track-II হলো বেসরকারি বা নাগরিক সমাজ পর্যায়ের অনানুষ্ঠানিক কূটনীতি।'},
+{d:'vhard',t:'নিচের জোড়াগুলোর মধ্যে কোনগুলো সঠিকভাবে মিলেছে?',s:['Global Peace Index — Institute for Economics & Peace (IEP)','Corruption Perceptions Index — Transparency International','Rule of Law Index — Institute for Economics & Peace (IEP)','Global Terrorism Index — World Justice Project'],o:['i, ii','ii, iii','i, iv','iii, iv'],a:0,e:'Rule of Law Index প্রকাশ করে World Justice Project, আর Global Terrorism Index প্রকাশ করে IEP। তাই iii ও iv ভুল।'},
+{d:'vhard',t:'আন্তর্জাতিক সম্পর্কের তত্ত্ব নিয়ে নিচের কোন তথ্যটি ভুল?',s:['Realism: রাষ্ট্র নিজ স্বার্থকে সর্বোচ্চ গুরুত্ব দেয়।','Liberal institutionalism: আন্তর্জাতিক প্রতিষ্ঠান সহযোগিতার মাধ্যমে সংঘাত কমাতে পারে।','Constructivism-এর অন্যতম প্রবক্তা Robert Keohane।','Marxism: শ্রেণিসংঘাত ও পুঁজিবাদের ওপর গুরুত্ব দেয়।'],o:['কেবল i','কেবল iii','ii, iv','iii, iv'],a:1,e:'Constructivism-এর প্রবক্তা Alexander Wendt। Robert Keohane ও Joseph Nye উদারতাবাদী (নব্য) তাত্ত্বিক।'}
+].map(x=>({q:x.t,s:x.s,o:x.o,a:x.a,e:x.e}))};
+/* ========================= */
+
+const auth=getAuth(initializeApp(firebaseConfig)),db=getFirestore(),app=document.getElementById("app");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";"),L=["ক","খ","গ","ঘ"],bn=n=>String(n).replace(/\d/g,d=>"০১২৩৪৫৬৭৮৯"[d]);
+let U,ans={},cf={},tick,end;
+const R=["i","ii","iii","iv"],stm=s=>s?'<div class="st">'+s.map((x,i)=>R[i]+". "+x).join("<br>")+"</div>":"";
+
+function authView(m=""){app.innerHTML=`<div class="card"><h2>মক টেস্ট কেন্দ্র</h2><p class="err">${m}</p>
+<input id="n" placeholder="আপনার নাম (নতুন একাউন্টের জন্য)"><input id="e" type="email" placeholder="ইমেইল"><input id="p" type="password" placeholder="পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)"><input id="c" placeholder="ব্যাচ কোড (নতুন একাউন্টের জন্য)">
+<button id="li">লগইন করুন</button><button class="s" id="su">নতুন একাউন্ট খুলুন</button></div>`}
+
+function home(){app.innerHTML=`<div class="card"><h2>${esc(U.displayName||"")}, স্বাগতম</h2><p><b>${EXAM.title}</b><br>${bn(EXAM.qs.length)}টি প্রশ্ন · ${bn(EXAM.min)} মিনিট · সঠিক +১, ভুল −০.৫০</p>
+<button id="st">পরীক্ষা শুরু করুন</button><button class="s" id="lb">লিডারবোর্ড</button><button class="s" id="lo">লগআউট</button></div>`}
+
+function exam(){ans={};cf={};end=Date.now()+EXAM.min*6e4;
+app.innerHTML=`<div id="tm"><span id="tt"></span><span id="tc"></span></div>`+EXAM.qs.map((q,i)=>`<div class="card"><b>${bn(i+1)}. ${q.q}</b>${stm(q.s)}`+q.o.map((t,j)=>`<button class="o" data-i="${i}" data-j="${j}"><i>${L[j]}</i>${t}</button>`).join("")+`<label><input type="checkbox" style="width:auto" data-c="${i}"> দ্বিধা আছে</label></div>`).join("")+`<button id="sb">জমা দিন</button>`;
+clearInterval(tick);tick=setInterval(()=>{const s=Math.max(0,Math.round((end-Date.now())/1e3)),t=document.getElementById("tt");if(!t)return clearInterval(tick);t.textContent="⏱ "+bn(Math.floor(s/60))+":"+bn(String(s%60).padStart(2,"0"));document.getElementById("tc").textContent="উত্তর: "+bn(Object.keys(ans).length)+"/"+bn(EXAM.qs.length);if(!s)submit()},300)}
+
+async function submit(){clearInterval(tick);let r=0,w=0;
+EXAM.qs.forEach((q,i)=>{if(ans[i]!==undefined)ans[i]===q.a?r++:w++});const sc=r-w*.5,ref=doc(db,"attempts",U.uid+"_"+EXAM.id);let first=false,fail=false;
+try{if(!(await getDoc(ref)).exists()){await setDoc(ref,{uid:U.uid,examId:EXAM.id,name:U.displayName||"নামহীন",score:sc,right:r,wrong:w,t:Date.now()});first=true}}catch(e){fail=true}
+app.innerHTML=`<div class="card"><h2>আপনার স্কোর: ${bn(sc)} / ${bn(EXAM.qs.length)}</h2><p>সঠিক ${bn(r)} · ভুল ${bn(w)} · উত্তর দেননি ${bn(EXAM.qs.length-r-w)}</p>
+<p>${fail?'<span class="err">ফলাফল সেভ হয়নি, ইন্টারনেট বা Firestore Rules দেখুন।</span>':first?"এটি আপনার প্রথম চেষ্টা, তাই লিডারবোর্ডে গণ্য হয়েছে।":"আগে একবার দিয়েছেন, তাই এই চেষ্টা শুধু অনুশীলন। লিডারবোর্ডে প্রথমবারের স্কোর থাকবে।"}</p>
+<button id="lb">লিডারবোর্ড দেখুন</button><button class="s" id="hm">হোম</button></div>`+EXAM.qs.map((q,i)=>`<div class="card"><b>${bn(i+1)}. ${q.q}</b>${stm(q.s)}${cf[i]?" ⚠":""}`+q.o.map((t,j)=>`<div class="o ${j===q.a?"ok":ans[i]===j?"no":""}"><i>${L[j]}</i>${t}</div>`).join("")+`<p class="ex">${ans[i]===undefined?"উত্তর দেননি। ":""}${q.e}</p></div>`).join("")}
+
+async function board(){app.innerHTML=`<div class="card">লোড হচ্ছে...</div>`;let rows=[];
+try{(await getDocs(query(collection(db,"attempts"),where("examId","==",EXAM.id)))).forEach(d=>rows.push(d.data()))}catch(e){app.innerHTML=`<div class="card err">লিডারবোর্ড লোড হয়নি।</div><button id="hm">হোম</button>`;return}
+rows.sort((a,b)=>b.score-a.score||a.t-b.t);
+app.innerHTML=`<div class="card"><h2>লিডারবোর্ড: ${EXAM.title}</h2><p>শুধু প্রথমবারের স্কোর গণ্য</p><table><tr><th>র‍্যাংক</th><th>নাম</th><th>স্কোর</th></tr>`+(rows.map((x,i)=>`<tr class="${x.uid===U.uid?"me":""}"><td>${bn(i+1)}</td><td>${esc(x.name)}</td><td>${bn(x.score)}</td></tr>`).join("")||"<tr><td colspan=3>এখনো কেউ পরীক্ষা দেয়নি।</td></tr>")+`</table></div><button id="hm">হোম</button>`}
+
+const val=id=>document.getElementById(id).value.trim(),msg=x=>x.code==="auth/email-already-in-use"?"এই ইমেইলে একাউন্ট আছে":x.code==="auth/weak-password"?"পাসওয়ার্ড অন্তত ৬ অক্ষর দিন":"ইমেইল বা পাসওয়ার্ড ঠিক নয়";
+app.onclick=e=>{const b=e.target,d=b.dataset;
+if(d.j!==undefined){const i=+d.i;if(ans[i]===undefined){ans[i]=+d.j;b.classList.add("sel")}return}
+if(d.c!==undefined){cf[d.c]=b.checked;return}
+({li:()=>signInWithEmailAndPassword(auth,val("e"),val("p")).catch(x=>authView(msg(x))),
+su:()=>{if(!val("n"))return authView("নাম লিখুন");if(val("c")!==BATCH_CODE)return authView("ব্যাচ কোড ভুল");createUserWithEmailAndPassword(auth,val("e"),val("p")).then(r=>updateProfile(r.user,{displayName:val("n")}).then(()=>{U=auth.currentUser;home()})).catch(x=>authView(msg(x)))},
+st:exam,lb:board,hm:home,lo:()=>signOut(auth),sb:()=>confirm("জমা দেবেন?")&&submit()})[b.id]?.()};
+onAuthStateChanged(auth,u=>{U=u;u?home():authView()});
+</script></body></html>
