@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="bn"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>মক টেস্ট কেন্দ্র</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14213d;--bg:#eef1f6;--c:#fff;--t:#1b2333;--a:#0b6e4f;--r:#c0392b;--l:#c9d1e0}
+@media(prefers-color-scheme:dark){:root{--ink:#9db4ff;--bg:#0e1420;--c:#182133;--t:#e6eaf3;--a:#3ddc97;--r:#ff7b6b;--l:#33415c}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font:17px/1.6 "Hind Siliguri",system-ui,sans-serif}
+main{max-width:700px;margin:0 auto;padding:14px}
+.card{background:var(--c);border:1px solid var(--l);border-radius:6px;padding:16px;margin:12px 0}
+h2{margin:0 0 8px;color:var(--ink)}
+input{font:inherit;width:100%;padding:10px;margin:5px 0;border:1px solid var(--l);border-radius:6px;background:var(--bg);color:var(--t)}
+button{font:inherit;font-weight:600;padding:10px 18px;border:0;border-radius:6px;background:var(--ink);color:var(--c);cursor:pointer;margin:4px 4px 4px 0}
+button.s{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--a);outline-offset:2px}
+.o{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:transparent;color:var(--t);border:1px solid var(--l);margin:6px 0;font-weight:400}
+.o i{flex:none;width:30px;height:30px;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:15px}
+.o.sel i{background:var(--ink);color:var(--c)}
+.ok{border-color:var(--a)!important;background:color-mix(in srgb,var(--a) 15%,transparent)!important}
+.no{border-color:var(--r)!important;background:color-mix(in srgb,var(--r) 15%,transparent)!important}
+#tm{position:sticky;top:0;z-index:5;background:var(--ink);color:var(--c);padding:8px 14px;font-weight:700;display:flex;justify-content:space-between}
+table{width:100%;border-collapse:collapse}td,th{padding:8px 6px;border-bottom:1px solid var(--l);text-align:left}
+.me{font-weight:700;background:color-mix(in srgb,var(--a) 15%,transparent)}
+.err{color:var(--r);font-weight:600}.ex{margin:6px 0 0;font-size:15px;opacity:.85}
+</style></head><body><main id="app"></main>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,updateProfile}from"https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+import{getFirestore,doc,getDoc,setDoc,collection,query,where,getDocs}from"https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyBBAEQ-SMWnfu8Ug6v15yKuDFmipRCP-5o",authDomain:"mock--test-bddd4.firebaseapp.com",projectId:"mock--test-bddd4",storageBucket:"mock--test-bddd4.firebasestorage.app",messagingSenderId:"1005421506530",appId:"1:1005421506530:web:b18cbf011f83b3547853bb"};
+
+/* ====== এখানে বদলান ====== */
+const BATCH_CODE="batch2026";
+const EXAM={id:"w01",title:"সাপ্তাহিক পরীক্ষা ১ (নমুনা)",min:5,qs:[
+{q:"বাংলাদেশের জাতীয় কবি কে?",o:["রবীন্দ্রনাথ ঠাকুর","কাজী নজরুল ইসলাম","জীবনানন্দ দাশ","মাইকেল মধুসূদন দত্ত"],a:1,e:"১৯৭২ সালে নজরুলকে বাংলাদেশের জাতীয় কবির মর্যাদা দেওয়া হয়।"},
+{q:"'মেঘনাদবধ কাব্য'-এর রচয়িতা কে?",o:["কায়কোবাদ","নবীনচন্দ্র সেন","মাইকেল মধুসূদন দত্ত","হেমচন্দ্র বন্দ্যোপাধ্যায়"],a:2,e:"এটি অমিত্রাক্ষর ছন্দে লেখা মধুসূদনের মহাকাব্য।"},
+{q:"মুজিবনগর সরকার শপথ গ্রহণ করে কবে?",o:["২৬ মার্চ ১৯৭১","১০ এপ্রিল ১৯৭১","১৭ এপ্রিল ১৯৭১","১৬ ডিসেম্বর ১৯৭১"],a:2,e:"১৭ এপ্রিল ১৯৭১ মেহেরপুরের বৈদ্যনাথতলায় (মুজিবনগর) শপথ হয়।"},
+{q:"১ বাইট = কত বিট?",o:["৪","৬","৮","১৬"],a:2,e:"এক বাইটে ৮টি বিট থাকে।"},
+{q:"'পদ্মা নদীর মাঝি' উপন্যাসের লেখক কে?",o:["তারাশঙ্কর বন্দ্যোপাধ্যায়","বিভূতিভূষণ বন্দ্যোপাধ্যায়","মানিক বন্দ্যোপাধ্যায়","সৈয়দ ওয়ালীউল্লাহ"],a:2,e:"উপন্যাসটি মানিক বন্দ্যোপাধ্যায়ের লেখা।"}]};
+/* ========================= */
+
+const auth=getAuth(initializeApp(firebaseConfig)),db=getFirestore(),app=document.getElementById("app");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";"),L=["ক","খ","গ","ঘ"],bn=n=>String(n).replace(/\d/g,d=>"০১২৩৪৫৬৭৮৯"[d]);
+let U,ans={},cf={},tick,end;
+
+function authView(m=""){app.innerHTML=`<div class="card"><h2>মক টেস্ট কেন্দ্র</h2><p class="err">${m}</p>
+<input id="n" placeholder="আপনার নাম (নতুন একাউন্টের জন্য)"><input id="e" type="email" placeholder="ইমেইল"><input id="p" type="password" placeholder="পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)"><input id="c" placeholder="ব্যাচ কোড (নতুন একাউন্টের জন্য)">
+<button id="li">লগইন করুন</button><button class="s" id="su">নতুন একাউন্ট খুলুন</button></div>`}
+
+function home(){app.innerHTML=`<div class="card"><h2>${esc(U.displayName||"")}, স্বাগতম</h2><p><b>${EXAM.title}</b><br>${bn(EXAM.qs.length)}টি প্রশ্ন · ${bn(EXAM.min)} মিনিট · সঠিক +১, ভুল −০.৫০</p>
+<button id="st">পরীক্ষা শুরু করুন</button><button class="s" id="lb">লিডারবোর্ড</button><button class="s" id="lo">লগআউট</button></div>`}
+
+function exam(){ans={};cf={};end=Date.now()+EXAM.min*6e4;
+app.innerHTML=`<div id="tm"><span id="tt"></span><span id="tc"></span></div>`+EXAM.qs.map((q,i)=>`<div class="card"><b>${bn(i+1)}. ${q.q}</b>`+q.o.map((t,j)=>`<button class="o" data-i="${i}" data-j="${j}"><i>${L[j]}</i>${t}</button>`).join("")+`<label><input type="checkbox" style="width:auto" data-c="${i}"> দ্বিধা আছে</label></div>`).join("")+`<button id="sb">জমা দিন</button>`;
+clearInterval(tick);tick=setInterval(()=>{const s=Math.max(0,Math.round((end-Date.now())/1e3)),t=document.getElementById("tt");if(!t)return clearInterval(tick);t.textContent="⏱ "+bn(Math.floor(s/60))+":"+bn(String(s%60).padStart(2,"0"));document.getElementById("tc").textContent="উত্তর: "+bn(Object.keys(ans).length)+"/"+bn(EXAM.qs.length);if(!s)submit()},300)}
+
+async function submit(){clearInterval(tick);let r=0,w=0;
+EXAM.qs.forEach((q,i)=>{if(ans[i]!==undefined)ans[i]===q.a?r++:w++});const sc=r-w*.5,ref=doc(db,"attempts",U.uid+"_"+EXAM.id);let first=false,fail=false;
+try{if(!(await getDoc(ref)).exists()){await setDoc(ref,{uid:U.uid,examId:EXAM.id,name:U.displayName||"নামহীন",score:sc,right:r,wrong:w,t:Date.now()});first=true}}catch(e){fail=true}
+app.innerHTML=`<div class="card"><h2>আপনার স্কোর: ${bn(sc)} / ${bn(EXAM.qs.length)}</h2><p>সঠিক ${bn(r)} · ভুল ${bn(w)} · উত্তর দেননি ${bn(EXAM.qs.length-r-w)}</p>
+<p>${fail?'<span class="err">ফলাফল সেভ হয়নি, ইন্টারনেট বা Firestore Rules দেখুন।</span>':first?"এটি আপনার প্রথম চেষ্টা, তাই লিডারবোর্ডে গণ্য হয়েছে।":"আগে একবার দিয়েছেন, তাই এই চেষ্টা শুধু অনুশীলন। লিডারবোর্ডে প্রথমবারের স্কোর থাকবে।"}</p>
+<button id="lb">লিডারবোর্ড দেখুন</button><button class="s" id="hm">হোম</button></div>`+EXAM.qs.map((q,i)=>`<div class="card"><b>${bn(i+1)}. ${q.q}</b>${cf[i]?" ⚠":""}`+q.o.map((t,j)=>`<div class="o ${j===q.a?"ok":ans[i]===j?"no":""}"><i>${L[j]}</i>${t}</div>`).join("")+`<p class="ex">${ans[i]===undefined?"উত্তর দেননি। ":""}${q.e}</p></div>`).join("")}
+
+async function board(){app.innerHTML=`<div class="card">লোড হচ্ছে...</div>`;let rows=[];
+try{(await getDocs(query(collection(db,"attempts"),where("examId","==",EXAM.id)))).forEach(d=>rows.push(d.data()))}catch(e){app.innerHTML=`<div class="card err">লিডারবোর্ড লোড হয়নি।</div><button id="hm">হোম</button>`;return}
+rows.sort((a,b)=>b.score-a.score||a.t-b.t);
+app.innerHTML=`<div class="card"><h2>লিডারবোর্ড: ${EXAM.title}</h2><p>শুধু প্রথমবারের স্কোর গণ্য</p><table><tr><th>র‍্যাংক</th><th>নাম</th><th>স্কোর</th></tr>`+(rows.map((x,i)=>`<tr class="${x.uid===U.uid?"me":""}"><td>${bn(i+1)}</td><td>${esc(x.name)}</td><td>${bn(x.score)}</td></tr>`).join("")||"<tr><td colspan=3>এখনো কেউ পরীক্ষা দেয়নি।</td></tr>")+`</table></div><button id="hm">হোম</button>`}
+
+const val=id=>document.getElementById(id).value.trim(),msg=x=>x.code==="auth/email-already-in-use"?"এই ইমেইলে একাউন্ট আছে":x.code==="auth/weak-password"?"পাসওয়ার্ড অন্তত ৬ অক্ষর দিন":"ইমেইল বা পাসওয়ার্ড ঠিক নয়";
+app.onclick=e=>{const b=e.target,d=b.dataset;
+if(d.j!==undefined){const i=+d.i;if(ans[i]===undefined){ans[i]=+d.j;b.classList.add("sel")}return}
+if(d.c!==undefined){cf[d.c]=b.checked;return}
+({li:()=>signInWithEmailAndPassword(auth,val("e"),val("p")).catch(x=>authView(msg(x))),
+su:()=>{if(!val("n"))return authView("নাম লিখুন");if(val("c")!==BATCH_CODE)return authView("ব্যাচ কোড ভুল");createUserWithEmailAndPassword(auth,val("e"),val("p")).then(r=>updateProfile(r.user,{displayName:val("n")}).then(()=>{U=auth.currentUser;home()})).catch(x=>authView(msg(x)))},
+st:exam,lb:board,hm:home,lo:()=>signOut(auth),sb:()=>confirm("জমা দেবেন?")&&submit()})[b.id]?.()};
+onAuthStateChanged(auth,u=>{U=u;u?home():authView()});
+</script></body></html>
